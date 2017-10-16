@@ -58,9 +58,42 @@ plt.scatter(df.dropoff_longitude[:n],
 plt.show()
 
 
+###onehot encoding pickup and dropoff clusters
+##enc = preprocessing.OneHotEncoder()
+##enc.fit(df[['kmeans_pickup', 'kmeans_dropoff']])
+##onehotlabels = enc.transform(df[['kmeans_pickup', 'kmeans_dropoff']])
+##print(onehotlabels.shape)
+
+#creating dummy variables/one hot encoding, adding features
+print(df.shape)
+df = pd.concat([df, pd.get_dummies(df['pickup_hrs'], prefix = 'hrs')], axis = 1)
+print(df.shape)
+df = pd.concat([df, pd.get_dummies(df['day_week'], prefix = 'day')], axis = 1)
+print(df.shape)
+df['pickup_dropoff_cluster'] = df['kmeans_pickup'].map(str) + 'to' +  df['kmeans_dropoff'].map(str)
+print(df.shape)
+print(df['pickup_dropoff_cluster'])
+df = pd.concat([df, pd.get_dummies(df['pickup_dropoff_cluster'], prefix = 'route')], axis = 1)
+print(df.shape)
+print(df.head())
+
+print(df.columns)
+##cleaninig df for training containig only features
+df.drop(df.columns[[0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 13, 14, 15, 47]], axis = 1, inplace = True)
+
+print(df.columns)
+
+#fitting regression algo
+X = np.array(df.drop(['duration'], 1))
+X = preprocessing.scale(X)
+y = np.array(df['duration'])
+
+X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y, test_size = 0.2)
+clf = LinearRegression()
+clf.fit(X_train, y_train)
+accuracy = clf.score(X_test, y_test)
+
+print(accuracy)
 
 
-
-
-
-
+    
