@@ -3,6 +3,7 @@ import math
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import pickle
 from math import sqrt
 from sklearn.ensemble import RandomForestRegressor
 from sklearn import cross_validation
@@ -33,11 +34,7 @@ for i in range(20, 60, 10):
 plt.plot(a[:, 0], a[: 1], linewidth = 2.0)
 plt.show()
 
-#fitting the model
-clf = RandomForestRegressor(n_estimators = 50)
-clf.fit(X_train, y_train)
-accuracy = clf.score(X_test, y_test)
-print(accuracy)
+
 
 
 
