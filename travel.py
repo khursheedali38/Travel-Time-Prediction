@@ -2,9 +2,10 @@ import pandas as pd
 import datetime as dt
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestRegressor
 from sklearn import preprocessing, cross_validation, svm
 from sklearn.svm import LinearSVR
-from sklearn.linear_model import LinearRegression, SGDRegressor
+from sklearn.linear_model import LinearRegression, SGDRegressor, Ridge
 from sklearn.cluster import KMeans
 from matplotlib import style
 import pickle
@@ -28,7 +29,7 @@ df['tpep_dropoff_timestamp'] = (df['tpep_dropoff_datetime'] - dt.datetime(1970, 
 df['duration'] = df['tpep_dropoff_timestamp'] - df['tpep_pickup_timestamp']
 df['speed'] = (df['trip_distance'] * 3600)//df['duration']
 
-#cleaning for EDA
+#cleaning for EDA, removing outliers
 df = df[ (df['duration'] > 0)]
 df = df[ (df['speed'] > 6.0)]
 df = df[ (df['speed'] < 140.0)]
@@ -44,6 +45,9 @@ df.to_excel('random_2015_cleaned.xlsx')
 
 #EDA
 plt.scatter(df['duration'], df['trip_distance'])
+plt.title('Trip Duration VS Trip Distance')
+plt.xlabel('Trip Duration (secs)')
+plt.ylabel('Trip Distance (miles)')
 plt.show()
 
 #clustering pickup and dropoff locations
@@ -54,6 +58,9 @@ plt.scatter(df.pickup_longitude[:n],
             df.pickup_latitude[:n],
             cmap = 'viridis',
             c = df.kmeans_pickup[:n])
+plt.title('Pickup Location Clustering')
+plt.xlabel('Longitude')
+plt.ylabel('Latitude')
 plt.show()
 
 kmeans_dropoff = KMeans(n_clusters = 15, random_state = 2).fit(df[['dropoff_latitude', 'dropoff_longitude']])
@@ -62,6 +69,9 @@ plt.scatter(df.dropoff_longitude[:n],
             df.dropoff_latitude[:n],
             cmap = 'viridis',
             c = df.kmeans_dropoff[:n])
+plt.title('Dropoff Location Clustering')
+plt.xlabel('Longitude')
+plt.ylabel('Latitude')
 plt.show()
 
 #creating dummy variables/one hot encoding, adding features
@@ -78,18 +88,19 @@ X = np.array(df.drop(['duration'], 1))
 y = np.array(df['duration'])
 
 X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y, test_size = 0.2)
-##clf = LinearRegression(n_jobs = -1)
+##clf = RandomForestRegressor(n_jobs = -1)
 ##clf.fit(X_train, y_train)
-
-##saving the classifier
-##with open('linearregression.pickle', 'wb') as f:
+##
+####saving the classifier
+##with open('randomforestregression.pickle', 'wb') as f:
 ##    pickle.dump(clf, f)
 
 #load the classifier
-pickle_in = open('linearregression.pickle', 'rb')
+pickle_in = open('randomforestregression.pickle', 'rb')
 clf = pickle.load(pickle_in)
 accuracy = clf.score(X_test, y_test)
 
+print(clf.feature_importances_)
 print(accuracy)
 
 
